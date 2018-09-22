@@ -14,6 +14,9 @@ void GenerateString(int n, char* string) {  	// n - итераций, string - �
 		border = (1 << step) - 1;
 		start += 1;
 		string[border] = start;
+		/*
+		V: лучше использовать готовую ф-ю strncpy, чем писать свою реализацию
+		*/
 		for (int i = 1; i <= border; i++) {  
 			string[border + i] = string[i - 1];
 		}
@@ -21,7 +24,6 @@ void GenerateString(int n, char* string) {  	// n - итераций, string - �
 }
 
 int main() {
-
 	int n;					//задаваемое число итераций (1 шаг - "aba")
 	scanf("%d", &n);
 	char* string = (char*)malloc((1 << (n + 1)));

@@ -52,9 +52,8 @@ void main () {
     printf("Вывод %d слов:\n", count);                                  	// проверка
     for (int j = 0; j < count; j++){
 	    printf("%s\n", words[j]);
-	    free(words[j]);
   }
-    printf("Введенная строка:\n%s ", str);
+    printf("Введенная строка:\n%s ", str);					//проверка изменений в введенной строке
 
     free_memory(str, words, &count);						//очистка памяти
 }

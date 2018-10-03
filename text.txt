@@ -1,0 +1,9 @@
+8 3
+1 gcc infinity.c -o infinity
+2 echo Hello world
+3 ls -a
+4 ls -a
+5 echo Hello world
+6 echo Hello world
+7 ./infinity
+8 ./infinity

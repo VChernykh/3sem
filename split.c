@@ -48,9 +48,9 @@ void main () {
     split(str, separators, words, &count);
 
     printf("Вывод %d слов:\n", count);                                  	//проверка работы программы
-    for (int j = 0; j < count; j++){
+    for (int j = 0; j < count; j++) {
 	    printf("%s\n", words[j]);
-  }
+    }
 
     printf("Введенная строка:\n%s", str);					
 

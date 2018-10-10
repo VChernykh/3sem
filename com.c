@@ -22,8 +22,8 @@ void split(char* string, char* separators, char** words, int* count){	// string 
     token = strtok(str, separators);					// разделение на слова, token - новое слово
     int i = 0;								// счетчик token
 
-    while(token != NULL){
-
+    while(token != NULL)
+    {
 	words[i] = (char*) calloc (strlen(token) + 1, sizeof(char));        // выделение памяти и добваление слова в массив words
 
 	words[i] = strncpy(words[i], token, strlen(token));	
@@ -42,8 +42,8 @@ void free_memory(char* str, char** words, int count){
 }
 
 
-int main (int argc, char* argv[]) {
-
+int main (int argc, char* argv[]) 
+{
 	FILE *fp;
 	char name[] = "text.txt";
 	fp = fopen(name, "r");
@@ -72,7 +72,6 @@ int main (int argc, char* argv[]) {
 		coms[i] = strncpy(coms[i], buffer, strlen(buffer));
 	}
 	
-	
 	int status;
 	pid_t pid;
 	for (int i = 0; i < size; i++){							// разделение на 2 процесса для каждой команды
@@ -83,6 +82,8 @@ int main (int argc, char* argv[]) {
 				sleep(times[i]);					
 				split(coms[i], separators, words, &count);
 				execvp(words[0], words);				// исполнение команды
+				// FIXIT: вот здесь лучше написать exit(0), т.к. если команда не смогла запуститься, то дочерний процесс продолжит работу
+				// т.е. сразу несколько процессов одновременно будут запускать новые команды 
 			}else{
 				sleep(times[i] + time);
 				if (waitpid(pid, &status, WNOHANG) <= 0){		// завершение процесса (timeout)

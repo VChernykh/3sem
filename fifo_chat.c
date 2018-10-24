@@ -28,8 +28,11 @@ int main(int argc, char* argv[]){
 	pid_t pid;
 	pid = fork();						// разделяем процесс на два: для считывания из fifo и ввода в fifo
 	
-	if (pid == 0){				
+	if (pid == 0){	
+		// область видимости переменных лучше делать минимальной, т.е. раз num_1 используется только в цикле while, то ровно перед ним её и объявить
 		int num_1;
+		// FIXIT: чтобы не дублировать код, воспользуйтесь, пожалуйста, тернарным оператором:
+		// fd_r = open(atoi(argv[1]) == 1 ? name_s : name_e, O_RDONLY);
 		if(atoi(argv[1]) == 1){
 			fd_r = open(name_s, O_RDONLY);
 			if (fd_r == - 1){
@@ -45,6 +48,7 @@ int main(int argc, char* argv[]){
 			}
 		}
 
+		// Кажется, что смысл не изменится, а лишние вопросы исчезнут, если назовете переменные просто buffer и num 
 		do{
 			char* buffer_1 = (char*) calloc(max_size, sizeof(char));	// читает из fifo 
 			num_1 = read(fd_r, buffer_1, max_size - 1);			// выводит полученную строку		
@@ -55,7 +59,8 @@ int main(int argc, char* argv[]){
 	}
 	
 
-	if (pid > 0){						
+	if (pid > 0){
+		// Замечания и пожелания для данной части кода аналогичны
 		int num_2;
 		if(atoi(argv[1]) == 0){
 			fd_w = open(name_s, O_WRONLY);

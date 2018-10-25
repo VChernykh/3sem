@@ -30,62 +30,47 @@ int main(int argc, char* argv[]){
 	
 	if (pid == 0){	
 		// область видимости переменных лучше делать минимальной, т.е. раз num_1 используется только в цикле while, то ровно перед ним её и объявить
-		int num_1;
+		
 		// FIXIT: чтобы не дублировать код, воспользуйтесь, пожалуйста, тернарным оператором:
-		// fd_r = open(atoi(argv[1]) == 1 ? name_s : name_e, O_RDONLY);
-		if(atoi(argv[1]) == 1){
-			fd_r = open(name_s, O_RDONLY);
-			if (fd_r == - 1){
-				printf("Невозможно открыть first.fifo\n");
-				exit(-1);
-			}
-		}else{
+		fd_r = open(atoi(argv[1]) == 1 ? name_s : name_e, O_RDONLY);
 
-			fd_r = open(name_e, O_RDONLY);
-			if (fd_r == - 1){
-				printf("Невозможно открыть second.fifo\n");
-				exit(-1);
-			}
+		if (fd_r == - 1){
+			printf("Невозможно открыть fifo\n");
+			exit(-1);
 		}
 
+		int num;
 		// Кажется, что смысл не изменится, а лишние вопросы исчезнут, если назовете переменные просто buffer и num 
 		do{
-			char* buffer_1 = (char*) calloc(max_size, sizeof(char));	// читает из fifo 
-			num_1 = read(fd_r, buffer_1, max_size - 1);			// выводит полученную строку		
-			printf("%s", buffer_1);
-			free(buffer_1);
-		}while(num_1);
+			char* buffer = (char*) calloc(max_size, sizeof(char));	// читает из fifo 
+			num = read(fd_r, buffer, max_size - 1);			// выводит полученную строку		
+			printf("%s", buffer);
+			free(buffer);
+		}while(num);
 	
 	}
 	
 
 	if (pid > 0){
 		// Замечания и пожелания для данной части кода аналогичны
-		int num_2;
-		if(atoi(argv[1]) == 0){
-			fd_w = open(name_s, O_WRONLY);
-			if (fd_w == - 1){
-				printf("Невозможно открыть first.fifo\n");
-				exit(-1);
-			}
-		}else{
-			fd_w = open(name_e, O_WRONLY);
-			if (fd_w == - 1){
-				printf("Невозможно открыть second.fifo\n");
-				exit(-1);
-			}
+
+		fd_w = open(atoi(argv[1]) == 0 ? name_s : name_e, O_WRONLY);
+
+		if (fd_w == - 1){
+			printf("Невозможно открыть fifo\n");
+			exit(-1);
 		}
 
+		int num;
 		do{
-			char* buffer_2 = (char*) calloc(max_size, sizeof(char));			
-			fgets(buffer_2, max_size - 1, stdin);				// считывает вводимую строку
-			num_2 = write(fd_w, buffer_2, max_size - 1);			// записывает в файл fifo
-			free(buffer_2);
-		}while(num_2);
+			char* buffer = (char*) calloc(max_size, sizeof(char));			
+			fgets(buffer, max_size - 1, stdin);				// считывает вводимую строку
+			num = write(fd_w, buffer, max_size - 1);			// записывает в файл fifo
+			free(buffer);
+		}while(num);
 	}
 
 	close(fd_r);
 	close(fd_w);
 	return 0;
 }
-

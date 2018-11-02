@@ -11,6 +11,11 @@
 #define max_size 30						
 #define mask 0777						// маска для fifo
 
+/*
+Давайте зачтем данный вариант. Но обратите внимание на следующие пожелания:
+1) #define max_size пишите, пожалуйста, вот в таком стиле #define MAX_SIZE
+2) незачем каждый раз в циклах do/while выделять память в куче и освобождать. достаточно сделать это 1 раз до цикла. 
+*/
 
 int main(int argc, char* argv[]){
 
@@ -29,9 +34,6 @@ int main(int argc, char* argv[]){
 	pid = fork();						// разделяем процесс на два: для считывания из fifo и ввода в fifo
 	
 	if (pid == 0){	
-		// область видимости переменных лучше делать минимальной, т.е. раз num_1 используется только в цикле while, то ровно перед ним её и объявить
-		
-		// FIXIT: чтобы не дублировать код, воспользуйтесь, пожалуйста, тернарным оператором:
 		fd_r = open(atoi(argv[1]) == 1 ? name_s : name_e, O_RDONLY);
 
 		if (fd_r == - 1){
@@ -40,20 +42,16 @@ int main(int argc, char* argv[]){
 		}
 
 		int num;
-		// Кажется, что смысл не изменится, а лишние вопросы исчезнут, если назовете переменные просто buffer и num 
-		do{
+		do {
 			char* buffer = (char*) calloc(max_size, sizeof(char));	// читает из fifo 
 			num = read(fd_r, buffer, max_size - 1);			// выводит полученную строку		
 			printf("%s", buffer);
 			free(buffer);
-		}while(num);
-	
+		} while(num);
 	}
 	
 
 	if (pid > 0){
-		// Замечания и пожелания для данной части кода аналогичны
-
 		fd_w = open(atoi(argv[1]) == 0 ? name_s : name_e, O_WRONLY);
 
 		if (fd_w == - 1){
@@ -62,12 +60,12 @@ int main(int argc, char* argv[]){
 		}
 
 		int num;
-		do{
+		do {
 			char* buffer = (char*) calloc(max_size, sizeof(char));			
 			fgets(buffer, max_size - 1, stdin);				// считывает вводимую строку
 			num = write(fd_w, buffer, max_size - 1);			// записывает в файл fifo
 			free(buffer);
-		}while(num);
+		} while(num);
 	}
 
 	close(fd_r);

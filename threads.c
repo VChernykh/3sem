@@ -15,9 +15,11 @@
 //  при n = 3, a = 0.74
 //  при n = 4, a = 0.66
 
+// Судя по вашим данным, у вас замедление, а не ускорение
+// Попробуйте взять код ф-и get_wall_time для linux отсюда https://stackoverflow.com/questions/17432502/how-can-i-measure-cpu-time-and-wall-clock-time-on-both-linux-windows
+// Кажется, что код написан верно и должны получить ускорение, а не замедление
 
 struct data{				// данный передаваемые каждой нити
-
 	int step;	
 	int* mass;
 	int current;
@@ -40,6 +42,8 @@ void* find_sum(void* argv){
 void* find_disp(void* argv){
 	struct data* data_thr = (struct data*) argv;
 	float disp = 0;
+	// FIXIT: у вас при подсчете среднего циклы от current до current + step ... здесь же от 0 до step
+	// Кажется, что всего один вариант может быть правильным.
 	for(int i = 0; i < data_thr->step; i++){
 		disp +=  (data_thr->mass[i] - data_thr->average) * (data_thr->mass[i] - data_thr->average);
 	}
@@ -51,6 +55,7 @@ int main()
 	int num;				// количество нитей
 	printf("Enter number of threads:\n");
 	scanf("%d", &num);	
+	// FIXIT: а что если SIZE не делится нацело на num? Кажется, что в данном случае мы потеряем несколько последних элементов.
 	int step = SIZE / num;
 	int create_status;
 	int join_status;
@@ -97,7 +102,6 @@ int main()
 
 	for(int i = 0; i < num; i++){
 		total_sum += structs[i].sum;
-
 	}
 	average = total_sum / SIZE;
 ///вычисление дисперсии

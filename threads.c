@@ -3,6 +3,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <time.h>
+#include <sys/time.h>
  
 #define ERROR_CREATE_THREAD -11
 #define ERROR_JOIN_THREAD   -12
@@ -11,13 +12,26 @@
 
 
 //ускорение a(отношение времен) для n потоков:
-//  при n = 2, a = 0.89
-//  при n = 3, a = 0.74
-//  при n = 4, a = 0.66
+//  при n = 2, a = 1.12
+//  при n = 3, a = 1.21
+//  при n = 4, a = 1.27
 
 // Судя по вашим данным, у вас замедление, а не ускорение
 // Попробуйте взять код ф-и get_wall_time для linux отсюда https://stackoverflow.com/questions/17432502/how-can-i-measure-cpu-time-and-wall-clock-time-on-both-linux-windows
 // Кажется, что код написан верно и должны получить ускорение, а не замедление
+
+
+double get_wall_time(){
+    struct timeval time;
+    if (gettimeofday(&time, NULL)){
+        //  Handle error
+        return 0;
+    }
+    return (double)time.tv_sec + (double)time.tv_usec * .000001;
+}
+double get_cpu_time(){
+    return (double)clock() / CLOCKS_PER_SEC;
+}
 
 struct data{				// данный передаваемые каждой нити
 	int step;	
@@ -30,7 +44,6 @@ struct data{				// данный передаваемые каждой нити
 
 void* find_sum(void* argv){
 	struct data* data_thr = (struct data*) argv;
-	
 	int new = data_thr->current + data_thr->step;
 	double sum = 0;
 	for(int i = data_thr->current; i < new; i++){
@@ -41,10 +54,11 @@ void* find_sum(void* argv){
 
 void* find_disp(void* argv){
 	struct data* data_thr = (struct data*) argv;
+	int new = data_thr->current + data_thr->step;
 	float disp = 0;
 	// FIXIT: у вас при подсчете среднего циклы от current до current + step ... здесь же от 0 до step
 	// Кажется, что всего один вариант может быть правильным.
-	for(int i = 0; i < data_thr->step; i++){
+	for(int i = data_thr->current; i < new; i++){
 		disp +=  (data_thr->mass[i] - data_thr->average) * (data_thr->mass[i] - data_thr->average);
 	}
 	data_thr->disp = disp;
@@ -74,17 +88,23 @@ int main()
 	structs[0].current = 0;
 	structs[0].average = 0;
 	for(int i = 1; i < num; i++){
-		structs[i].step = step;
+		structs[i].current = structs[i - 1].current + step;
 		structs[i].mass = mass;
 		structs[i].sum = 0;
 		structs[i].disp = 0;
-		structs[i].current = structs[i - 1].current + step;
+		if (i == (num - 1)){
+			structs[i].step = SIZE - (step * (num - 1));
+		}
+		else
+			structs[i].step = step;
 	}
+
 	for(int i = 0; i < SIZE; i++){		//тривиальный случай для проверки
 		mass[i] = 1;
 	}
 ///вычисление среднего
-	clock_t begin = clock();
+	double wall0 = get_wall_time();
+	double cpu0  = get_cpu_time();
 
 	for(int i = 0; i < num; i++){
 		pthread_create(&(threads[i]), NULL, find_sum, &(structs[i]));
@@ -126,11 +146,15 @@ int main()
 		total_disp += structs[i].disp;
 	}
 	disp = total_disp / (SIZE - 1);
-	clock_t end = clock();
+	double wall1 = get_wall_time();
+	double cpu1  = get_cpu_time();
 ///
-	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	double time_spent_cpu = cpu1 - cpu0;
+	double time_spent_wall = wall1 - wall0;
+
 	//printf("average: %f\ndispersion: %f\n", average, disp);	// вывод результатов
-	printf("time:%f\n", time_spent);
+	printf("CPU time:%f\n", time_spent_cpu);
+	printf("Wall time:%f\n", time_spent_wall);
 
 	free(threads);
 	free(mass);

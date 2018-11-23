@@ -9,8 +9,7 @@
 #include <malloc.h>
 #include <ctype.h>
 
-#define TABLE_LIMIT 2
-#define DISHES_TYPES_QUANTITY 4
+#define TABLE_LIMIT 10
 #define END 39
 
 void sem(int count, int number, int semid){
